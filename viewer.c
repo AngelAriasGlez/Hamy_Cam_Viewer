@@ -129,7 +129,7 @@ int vlc_main(char *filepath, char *options) {
   // }
 // Create SDL graphics objects.
   SDL_Window * window = SDL_CreateWindow(
-    "SyncPlayer",
+    "Wireless Cam Viewer",
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
     WIDTH, HEIGHT,
