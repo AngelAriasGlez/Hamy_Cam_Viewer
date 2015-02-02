@@ -78,7 +78,7 @@ static void quit(int c) {
   exit(c);
 }
 
-int vlc_main(char *filepath, char *options) {
+int vlc_main(char *filePath, char *options) {
 
   libvlc_instance_t *libvlc;
   libvlc_media_t *m;
@@ -168,9 +168,9 @@ int vlc_main(char *filepath, char *options) {
     return EXIT_FAILURE;
   }
 
-  m = libvlc_media_new_location(libvlc, filepath);
+  m = libvlc_media_new_location(libvlc, filePath);
   libvlc_media_add_option(m, options);
-  printf("Media: %s\n", filepath);
+  printf("Media: %s\n", filePath);
   mp = libvlc_media_player_new_from_media(m);
   libvlc_media_release(m);
 
@@ -209,9 +209,9 @@ int vlc_main(char *filepath, char *options) {
       case SDLK_4: {
         char channel[14];
         int n = sprintf(channel, ":v4l2-input=%d", action - 49);
-        m = libvlc_media_new_location(libvlc, filepath);
+        m = libvlc_media_new_location(libvlc, filePath);
         libvlc_media_add_option(m, options);
-        libvlc_media_add_option(m, ":live-caching=80");
+        libvlc_media_add_option(m, ":live-caching=80 :v4l2-standard=PAL");
         libvlc_media_add_option(m, channel);
         libvlc_media_player_set_media(mp, m);
         libvlc_media_player_play(mp);
@@ -269,25 +269,18 @@ int vlc_main(char *filepath, char *options) {
 
 int main(int argc, char *argv[]) {
   char *client_addr_str = NULL;
-  char *filepath = NULL;
+  char defaultPath[20] = "v4l2:///dev/video0";
+  char *filePath = NULL;
   char *options = NULL;
   char c;
-  while ((c = getopt(argc, argv, "f:o:")) != -1) {
+  while ((c = getopt(argc, argv, "f:o:h")) != -1) {
     switch (c) {
-      case 'f':
-      filepath = optarg;
-      break;
-      case 'o':
-      options = optarg;
-      break;
-      case '?':
-      if (optopt == 'f')
-        fprintf(stderr, "Option %c requires a filepath as an argument\n", optopt);
-      else {
-        fprintf(stderr, "Unknown option %c\n", optopt);
-        return 0;
-      }
+      case('f'): filePath = optarg; break;
+      case('o'): options = optarg; break;
+      case('h'): fprintf(stdout, "Usage: ./viewer -f <path> -o <vlc-options>\n\te.g. ./viewer %s\n", defaultPath); exit(0);
+      default: fprintf(stderr, "Unknown option %c\n", optopt); exit(0);
     }
   }
-  vlc_main(filepath, options);
+  if (filePath == NULL) filePath = defaultPath;
+  vlc_main(filePath, options);
 }
